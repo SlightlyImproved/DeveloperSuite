@@ -1,0 +1,24 @@
+<Bindings>
+    <Layer name="General">
+        <Category name="Developer Suite">
+            <Action name="DEVELOPER_SUITE_ZGOO_MOC">
+                <Down>DeveloperSuite_Binding_ZgooMoc()</Down>
+            </Action>
+            <Action name="DEVELOPER_SUITE_RELOADUI">
+                <Down>DeveloperSuite_Binding_Reload()</Down>
+            </Action>
+            <Action name="DEVELOPER_SUITE_LIBRARY">
+                <Down>DeveloperSuite_Binding_Library()</Down>
+            </Action>
+            <Action name="DEVELOPER_SUITE_EXPLORER">
+                <Down>DeveloperSuite_Binding_Explorer()</Down>
+            </Action>
+            <Action name="DEVELOPER_SUITE_EDITOR">
+                <Down>DeveloperSuite_Binding_Editor()</Down>
+            </Action>
+            <Action name="DEVELOPER_SUITE_RUN">
+                <Down>DeveloperSuite_Binding_Run()</Down>
+            </Action>
+        </Category>
+    </Layer>
+</Bindings>

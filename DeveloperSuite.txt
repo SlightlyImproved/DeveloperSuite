@@ -1,0 +1,11 @@
+## APIVersion: 100013
+## Title: Developer Suite
+## Version: 0.1.2alpha (Dec 6 2015)
+## Author: haggen
+## License: CC-BY-NC-SA-4.0
+## SavedVariables: DeveloperSuiteSavedVars
+
+Textures.lua
+DeveloperSuite.lua
+DeveloperSuite.xml
+Bindings.xml
