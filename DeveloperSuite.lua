@@ -1,64 +1,76 @@
--- Developer Suite 0.1.2alpha (Dec 6 2015)
--- Licensed under CC-BY-NC-SA-4.0
+-- Developer Suite 0.2.0beta (Jan 17 2016)
+-- Licensed under CC BY-NC-SA 4.0
 
 local DEVELOPER_SUITE = "DeveloperSuite"
-
+local VERSION = "Version 0.2.0beta (Jan 17 2016)"
 --
 --
 --
 
-function DeveloperSuite_Restore(control, sv)
-    if not (sv.offsetX == 0 and sv.offsetY == 0) then
-        control:ClearAnchors()
-        control:SetAnchor(TOPLEFT, nil, TOPLEFT, sv.offsetX, sv.offsetY)
+function DeveloperSuite_TopLevelControl_Restore(self)
+    if not (self.sv.offsetX == 0 and self.sv.offsetY == 0) then
+        self.control:ClearAnchors()
+        self.control:SetAnchor(TOPLEFT, nil, TOPLEFT, self.sv.offsetX, self.sv.offsetY)
     end
-    control:SetDimensions(sv.x, sv.y)
-    control:SetHidden(sv.hidden)
+    self.control:SetDimensions(self.sv.x, self.sv.y)
+    self.control:SetHidden(self.sv.hidden)
 end
 
-function DeveloperSuite_Initialize(control, sv)
-    control:SetHandler("OnShow", function()
-        sv.hidden = false
+function DeveloperSuite_TopLevelControl_Initialize(self, control, sv)
+    self.control = control
+    self.sv = sv
+
+    self.control:SetHandler("OnShow", function()
+        self.sv.hidden = false
     end)
 
-    control:SetHandler("OnHide", function()
-        sv.hidden = true
+    self.control:SetHandler("OnHide", function()
+        self.sv.hidden = true
     end)
 
-    control:SetHandler("OnMoveStop", function()
-        sv.offsetX = control:GetLeft()
-        sv.offsetY = control:GetTop()
+    self.control:SetHandler("OnMoveStop", function()
+        self.sv.offsetX = self.control:GetLeft()
+        self.sv.offsetY = self.control:GetTop()
     end)
 
-    control:SetHandler("OnResizeStop", function()
-        sv.x = control:GetWidth()
-        sv.y = control:GetHeight()
+    self.control:SetHandler("OnResizeStop", function()
+        self.sv.x = self.control:GetWidth()
+        self.sv.y = self.control:GetHeight()
     end)
+
+    DeveloperSuite_TopLevelControl_Restore(self)
 end
 
-function DeveloperSuite_Show(control)
+function DeveloperSuite_TopLevelControl_Show(control)
     control:SetHidden(false)
     control:BringWindowToTop()
     SCENE_MANAGER:SetInUIMode(true)
 end
 
-function DeveloperSuite_SmartToggle(tlc, editBox)
-    if tlc:IsHidden() then
-        DeveloperSuite_Show(tlc)
-        editBox:TakeFocus()
-    else
-        if editBox:HasFocus() then
-            editBox:LoseFocus()
-            DeveloperSuite_Hide(tlc)
-        else
-            DeveloperSuite_Show(tlc)
-            editBox:TakeFocus()
-        end
-    end
+function DeveloperSuite_TopLevelControl_Hide(control)
+    control:SetHidden(true)
 end
 
-function DeveloperSuite_Hide(control)
-    control:SetHidden(true)
+function DeveloperSuite_TopLevelControl_Toggle(control, editBox)
+    if control:IsHidden() then
+        DeveloperSuite_TopLevelControl_Show(control)
+
+        if editBox then
+            editBox:TakeFocus()
+        end
+    else
+        if editBox then
+            if editBox:HasFocus() then
+                editBox:LoseFocus()
+                DeveloperSuite_TopLevelControl_Hide(control)
+            else
+                DeveloperSuite_TopLevelControl_Show(control)
+                editBox:TakeFocus()
+            end
+        else
+            DeveloperSuite_TopLevelControl_Hide(self.control)
+        end
+    end
 end
 
 --
@@ -108,11 +120,7 @@ function About:New(...)
 end
 
 function About:Initialize(control, sv)
-    self.control = control
-    self.sv = sv
-
-    DeveloperSuite_Initialize(self.control, self.sv)
-    DeveloperSuite_Restore(self.control, self.sv)
+    DeveloperSuite_TopLevelControl_Initialize(self, control, sv)
 
     SLASH_COMMANDS["/developersuite"] = function()
         self:Toggle()
@@ -121,9 +129,9 @@ end
 
 function About:Toggle()
     if self.control:IsHidden() then
-        DeveloperSuite_Show(self.control)
+        DeveloperSuite_TopLevelControl_Show(self.control)
     else
-        DeveloperSuite_Hide(self.control)
+        DeveloperSuite_TopLevelControl_Hide(self.control)
     end
 end
 
@@ -132,56 +140,114 @@ end
 --
 --
 
-local Editor = ZO_Object:Subclass()
+local function DeveloperSuite_Console_Dump(value, indent, history)
+    indent = indent or ""
+    history = history or {}
 
-function Editor:New(...)
-    local editor = ZO_Object.New(self)
-    editor:Initialize(...)
-    return editor
+    local dump = ""
+    local valueType = type(value)
+
+    if (valueType == "table") then
+        if not history[value] then
+            dump = dump.."(table)\n"
+            history[value] = true
+            for k, v in pairs(value) do
+                dump = dump..string.format("%s[%s] = %s", indent, tostring(k), DeveloperSuite_Console_Dump(v, indent.." ", history))
+            end
+        else
+            dump = dump.."(redundant)\n"
+        end
+    elseif (valueType == "userdata") then
+        dump = dump.."(userdata)\n"
+    else
+        dump = dump.."("..valueType..") "..tostring(value).."\n"
+    end
+
+    return dump..""
 end
 
-function Editor:Initialize(control, sv)
-    self.control = control
-    self.sv = sv
+local Console = ZO_Object:Subclass()
 
-    DeveloperSuite_Initialize(self.control, self.sv)
-    DeveloperSuite_Restore(self.control, self.sv)
+function Console:New(...)
+    local console = ZO_Object.New(self)
+    console:Initialize(...)
+    return console
+end
 
-    local scriptEditBox = GetControl(self.control, "ScriptEditBox")
-    scriptEditBox:SetText(self.sv.script)
-    scriptEditBox:SetHandler("OnTextChanged", function()
-        self.sv.script = scriptEditBox:GetText()
-    end)
+function Console:Initialize(control, sv)
+    DeveloperSuite_TopLevelControl_Initialize(self, control, sv)
 
-    local runButton = GetControl(self.control, "RunButton")
-    runButton:SetHandler("OnClicked", function()
-        self:Run()
-    end)
-
-    SLASH_COMMANDS["/editor"] = function()
+    SLASH_COMMANDS["/console"] = function()
         self:Toggle()
     end
+
+    local outputEditBox = GetControl(self.control, "Output")
+    outputEditBox:SetText(self.sv.output)
+    outputEditBox:SetHandler("OnTextChanged", function()
+        self.sv.output = outputEditBox:GetText()
+    end)
+
+    local historyIndex = #self.sv.history + 1
+
+    local inputEditBox = GetControl(self.control, "Input")
+    inputEditBox:SetHandler("OnEnter", function()
+        local source = inputEditBox:GetText()
+
+        table.insert(self.sv.history, source)
+        historyIndex = #self.sv.history + 1
+
+        if source == "clear" then
+            outputEditBox:SetText("")
+        elseif source == "exit" then
+            self:Toggle()
+        else
+            source = string.format("DEVELOPER_SUITE_CONSOLE:Output(function() return %s end)", source)
+            local script = zo_loadstring(source)
+
+            if script then
+                script()
+            end
+        end
+
+        inputEditBox:SetText("")
+    end)
+
+    inputEditBox:SetHandler("OnUpArrow", function()
+        if (historyIndex > 1) then
+            historyIndex = historyIndex - 1
+            inputEditBox:SetText(self.sv.history[historyIndex])
+        end
+    end)
+
+    inputEditBox:SetHandler("OnDownArrow", function()
+        if (historyIndex <= #self.sv.history) then
+            historyIndex = historyIndex + 1
+            inputEditBox:SetText(self.sv.history[historyIndex])
+        end
+    end)
 end
 
-function Editor:Toggle()
-    local editBox = GetControl(self.control, "ScriptEditBox")
-    DeveloperSuite_SmartToggle(self.control, editBox)
-end
+function Console:Output(mixed)
+    local outputEditBox = GetControl(self.control, "Output")
+    local history = outputEditBox:GetText()
 
-function Editor:Run()
-    local editBox = GetControl(self.control, "ScriptEditBox")
-    local script = zo_loadstring(editBox:GetText())
-
-    if script then
-        script()
+    if type(mixed) == "function" then
+        outputEditBox:SetText(history..DeveloperSuite_Console_Dump(mixed()))
+    else
+        outputEditBox:SetText(history..DeveloperSuite_Console_Dump(mixed))
     end
 end
 
+function Console:Toggle()
+    local inputEditBox = GetControl(self.control, "Input")
+    DeveloperSuite_TopLevelControl_Toggle(self.control, inputEditBox)
+end
+
 --
 --
 --
 
-local EXPLORER_ROW_HEIGHT = 26
+local EXPLORER_ROW_HEIGHT = 28
 local EXPLORER_ENTRY_DATA = 1
 
 local Explorer = ZO_SortFilterList:Subclass()
@@ -197,21 +263,27 @@ function Explorer:Initialize(control, sv)
 
     self:SetAlternateRowBackgrounds(true)
 
-    self.sv = sv
+    DeveloperSuite_TopLevelControl_Initialize(self, control, sv)
 
-    DeveloperSuite_Initialize(control, sv)
-    DeveloperSuite_Restore(control, sv)
+    local searchEditBox = GetControl(control, "SearchEditBox")
 
-    local searchBox = GetControl(control, "SearchBox")
-
-    searchBox:SetText(sv.search.query)
-    searchBox:SetHandler("OnTextChanged", function()
+    searchEditBox:SetText(sv.search.query)
+    searchEditBox:SetHandler("OnTextChanged", function()
         self:RefreshData()
-        sv.search.query = searchBox:GetText()
+        sv.search.query = searchEditBox:GetText()
     end)
 
-    for _, type in ipairs({"Function", "Table", "Number", "String", "Other"}) do
-        local control = GetControl(control, "SearchTypes"..type)
+    local searchOptions =
+    {
+        "Function",
+        "Table",
+        "Number",
+        "String",
+        "Other",
+    }
+
+    for _, type in ipairs(searchOptions) do
+        local control = GetControl(control, "SearchOption"..type.."Button")
 
         DeveloperSuite_StateButton_ChangeState(control, sv.search.options["include"..type])
         DeveloperSuite_StateButton_SetStateChangeFunction(control, function(state)
@@ -319,24 +391,13 @@ function Explorer:SetupRow(control, data)
     GetControl(control, "Value"):SetText(data.value)
     GetControl(control, "Value"):SetMouseEnabled(true)
     GetControl(control, "Value"):SetHandler("OnMouseDown", function()
-        SLASH_COMMANDS["/zgoo"](data.name)
+        SLASH_COMMANDS["/tbug"](data.name)
     end)
 end
 
 function Explorer:Toggle()
-    local searchBox = GetControl(self.control, "SearchBox")
-
-    if self.control:IsHidden() then
-        DeveloperSuite_Show(self.control)
-        searchBox:TakeFocus()
-    else
-        if searchBox:HasFocus() then
-            DeveloperSuite_Hide(self.control)
-        else
-            searchBox:TakeFocus()
-            self.control:BringWindowToTop()
-        end
-    end
+    local searchEditBox = GetControl(self.control, "SearchEditBox")
+    DeveloperSuite_TopLevelControl_Toggle(self.control, searchEditBox)
 end
 
 
@@ -344,7 +405,7 @@ end
 --
 --
 
-local LIBRARY_ROW_HEIGHT = 26
+local LIBRARY_ROW_HEIGHT = 28
 local LIBRARY_ENTRY_DATA = 1
 
 local Library = ZO_SortFilterList:Subclass()
@@ -364,12 +425,9 @@ function Library:Initialize(control, sv)
 
     self:SetAlternateRowBackgrounds(true)
 
-    self.sv = sv
+    DeveloperSuite_TopLevelControl_Initialize(self, control, sv)
 
-    DeveloperSuite_Initialize(control, sv)
-    DeveloperSuite_Restore(control, sv)
-
-    local searchBox = GetControl(control, "SearchBox")
+    local searchBox = GetControl(control, "SearchEditBox")
 
     searchBox:SetText(sv.search.query)
     searchBox:SetHandler("OnTextChanged", function()
@@ -379,8 +437,8 @@ function Library:Initialize(control, sv)
 
     local texturePreview = GetControl(control, "Preview")
 
-    local searchTypeTextureButton = GetControl(control, "SearchTypeTextureButton")
-    local searchTypeSoundButton = GetControl(control, "SearchTypeSoundButton")
+    local searchTypeTextureButton = GetControl(control, "SearchOptionTextureButton")
+    local searchTypeSoundButton = GetControl(control, "SearchOptionSoundButton")
 
     DeveloperSuite_StateButton_SetStateChangeFunction(searchTypeTextureButton, function(state)
         if state then
@@ -465,9 +523,14 @@ function Library:FilterScrollList()
     for i = 1, #self.masterList do
         local entry = self.masterList[i]
 
+        if (#scrollData > 1000) then
+            break
+        end
+
         if (query == "") or string.find(entry.slug, query, 1, true) then
             table.insert(scrollData, ZO_ScrollList_CreateDataEntry(LIBRARY_ENTRY_DATA, entry))
         end
+
     end
 end
 
@@ -514,14 +577,14 @@ function Library:SetupRow(control, data)
 end
 
 function Library:Toggle()
-    local searchBox = GetControl(self.control, "SearchBox")
+    local searchBox = GetControl(self.control, "SearchEditBox")
 
     if self.control:IsHidden() then
-        DeveloperSuite_Show(self.control)
+        DeveloperSuite_TopLevelControl_Show(self.control)
         searchBox:TakeFocus()
     else
         if searchBox:HasFocus() then
-            DeveloperSuite_Hide(self.control)
+            DeveloperSuite_TopLevelControl_Hide(self.control)
         else
             searchBox:TakeFocus()
             self.control:BringWindowToTop()
@@ -561,22 +624,15 @@ end
 --
 --
 
-ZO_CreateStringId("SI_DEVELOPER_SUITE_HELP", table.concat({
-    "   About /developersuite",
-    "  Editor /editor",
-    "Explorer /explorer",
-    " Library /library",
-}, "\n"))
-
-ZO_CreateStringId("SI_BINDING_NAME_DEVELOPER_SUITE_LIBRARY", "Open/close Media Library")
+ZO_CreateStringId("SI_DEVELOPER_SUITE_VERSION", VERSION)
+ZO_CreateStringId("SI_BINDING_NAME_DEVELOPER_SUITE_LIBRARY", "Open/close Library")
 ZO_CreateStringId("SI_BINDING_NAME_DEVELOPER_SUITE_EXPLORER", "Open/close Explorer")
-ZO_CreateStringId("SI_BINDING_NAME_DEVELOPER_SUITE_EDITOR", "Open/close Editor")
-ZO_CreateStringId("SI_BINDING_NAME_DEVELOPER_SUITE_RUN", "Run script")
+ZO_CreateStringId("SI_BINDING_NAME_DEVELOPER_SUITE_CONSOLE", "Open/close Console")
 ZO_CreateStringId("SI_BINDING_NAME_DEVELOPER_SUITE_RELOADUI", "Reload interface")
-ZO_CreateStringId("SI_BINDING_NAME_DEVELOPER_SUITE_ZGOO_MOC", "Inspect control under cursor")
+ZO_CreateStringId("SI_BINDING_NAME_DEVELOPER_SUITE_INSPECT_CONTROL", "Inspect control under cursor")
 
-function DeveloperSuite_Binding_ZgooMoc()
-    SLASH_COMMANDS["/zgoo"]("moc()")
+function DeveloperSuite_Binding_InspectControl()
+    SLASH_COMMANDS["/tbug"]("moc()")
 end
 
 function DeveloperSuite_Binding_Reload()
@@ -591,36 +647,33 @@ function DeveloperSuite_Binding_Explorer()
     DEVELOPER_SUITE_EXPLORER:Toggle(true)
 end
 
-function DeveloperSuite_Binding_Editor()
-    DEVELOPER_SUITE_EDITOR:Toggle(true)
-end
-
-function DeveloperSuite_Binding_Run()
-    DEVELOPER_SUITE_EDITOR:Run()
+function DeveloperSuite_Binding_Console()
+    DEVELOPER_SUITE_CONSOLE:Toggle(true)
 end
 
 --
 --
 --
 
-local sv =
+local defaultSavedVars =
 {
     ["about"] =
     {
         ["hidden"] = false,
-        ["x"] = 320,
-        ["y"] = 140,
+        ["x"] = 360,
+        ["y"] = 160,
         ["offsetX"] = 0,
         ["offsetY"] = 0,
     },
-    ["editor"] =
+    ["console"] =
     {
         ["hidden"] = true,
-        ["x"] = 480,
+        ["x"] = 520,
         ["y"] = 320,
         ["offsetX"] = 0,
         ["offsetY"] = 0,
-        ["script"] = "d(\"Edit me and click run!\")",
+        ["output"] = "",
+        ["history"] = {},
     },
     ["explorer"] =
     {
@@ -645,7 +698,7 @@ local sv =
     ["library"] =
     {
         ["hidden"] = true,
-        ["x"] = 320,
+        ["x"] = 400,
         ["y"] = 640,
         ["offsetX"] = 0,
         ["offsetY"] = 0,
@@ -661,10 +714,10 @@ EVENT_MANAGER:RegisterForEvent(DEVELOPER_SUITE, EVENT_ADD_ON_LOADED, function(ev
     if (addOnName == DEVELOPER_SUITE) then
         EVENT_MANAGER:UnregisterForEvent(DEVELOPER_SUITE, EVENT_ADD_ON_LOADED)
 
-        sv = ZO_SavedVars:NewAccountWide("DeveloperSuiteSavedVars", 1, nil, sv)
+        local sv = ZO_SavedVars:NewAccountWide("DeveloperSuiteSavedVars", 1, nil, defaultSavedVars)
 
         DEVELOPER_SUITE_ABOUT = About:New(DeveloperSuiteAbout, sv.about)
-        DEVELOPER_SUITE_EDITOR = Editor:New(DeveloperSuiteEditor, sv.editor)
+        DEVELOPER_SUITE_CONSOLE = Console:New(DeveloperSuiteConsole, sv.console)
         DEVELOPER_SUITE_EXPLORER = Explorer:New(DeveloperSuiteExplorer, sv.explorer)
         DEVELOPER_SUITE_LIBRARY = Library:New(DeveloperSuiteLibrary, sv.library)
 
@@ -681,10 +734,10 @@ EVENT_MANAGER:RegisterForEvent(DEVELOPER_SUITE, EVENT_ADD_ON_LOADED, function(ev
             SLASH_COMMANDS["/script"](string.format("d(%s)", src))
         end
 
-        -- Warn for missing Zgoo
-        if (SLASH_COMMANDS["/zgoo"] == nil) then
-            SLASH_COMMANDS["/zgoo"] = function()
-                d("Zgoo is required for many features to work properly, go get it at esoui.com.")
+        -- Warning for missing TorchBug
+        if (SLASH_COMMANDS["/tbug"] == nil) then
+            SLASH_COMMANDS["/tbug"] = function()
+                d("TorchBug is required for some features to work properly. Go get it at esoui.com.")
             end
         end
     end

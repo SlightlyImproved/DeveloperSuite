@@ -3,61 +3,82 @@
     <String name="DEVELOPER_SUITE_FONT_BOLD" value="DeveloperSuite/RobotoMono-Bold.ttf" />
 
     <Font name="DeveloperSuiteFontSmall" font="$(DEVELOPER_SUITE_FONT)|12|shadow" />
-    <Font name="DeveloperSuiteFont" font="$(DEVELOPER_SUITE_FONT)|14|shadow" />
+    <Font name="DeveloperSuiteFont" font="$(DEVELOPER_SUITE_FONT)|14|shadow" /><!-- 8.25 per letter -->
     <Font name="DeveloperSuiteFontBold" font="$(DEVELOPER_SUITE_FONT_BOLD)|14|shadow" />
-    <Font name="DeveloperSuiteFontBig" font="$(DEVELOPER_SUITE_FONT_BOLD)|18|shadow" />
-    <Font name="DeveloperSuiteFontHuge" font="$(DEVELOPER_SUITE_FONT_BOLD)|22|shadow" />
+    <Font name="DeveloperSuiteSmallFontBold" font="$(DEVELOPER_SUITE_FONT_BOLD)|10|shadow" />
+    <Font name="DeveloperSuiteFontBig" font="$(DEVELOPER_SUITE_FONT_BOLD)|18|shadow" /><!-- 11 per letter -->
 
     <Controls>
-        <Button name="DeveloperSuiteButton" font="DeveloperSuiteFontBig" inherits="ZO_DefaultTextButton" virtual="true" blendMode="ADD" alpha="0.9">
+
+        <!-- Text-only button with normal/hover/pressed blending colors -->
+        <Button name="DeveloperSuite_TextButton" font="DeveloperSuiteFontBig" inherits="ZO_DefaultTextButton" virtual="true" blendMode="ADD" alpha="0.9">
             <FontColors normalColor="CCCCCC" pressedColor="AAAAAA" mouseOverColor="FFFFFF" disabledColor="888888" />
         </Button>
 
-        <Button name="DeveloperSuiteStateButton" inherits="DeveloperSuiteButton" font="DeveloperSuiteFontBold" horizontalAlignment="LEFT" virtual="true">
+        <!-- Button with state (on/off) -->
+        <Button name="DeveloperSuite_StateButton" inherits="DeveloperSuite_TextButton" font="DeveloperSuiteFontBold" horizontalAlignment="LEFT" virtual="true">
             <OnInitialized>
                 DeveloperSuite_StateButton_Initialize(self)
             </OnInitialized>
-
             <OnClicked>
                 DeveloperSuite_StateButton_Toggle(self)
             </OnClicked>
         </Button>
 
+        <!-- Dark semi transparent background with outsets -->
+        <Texture name="DeveloperSuite_Background" inherits="ZO_TintableBackground" color="000000" blendMode="ALPHA" alpha="0.75" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="-10" offsetY="-10" />
+            <Anchor point="BOTTOMRIGHT" offsetX="10" offsetY="10" />
+        </Texture>
+
+        <!-- Apply font and backdrop -->
+        <EditBox name="DeveloperSuite_EditBox" font="DeveloperSuiteFont" virtual="true">
+            <Dimensions y="18" />
+            <Controls>
+                <Texture name="$(parent)BG" inherits="DeveloperSuite_Background" />
+            </Controls>
+        </EditBox>
+
+        <!-- Non-edittable, auto-select on focus (for copy) -->
+        <EditBox name="DeveloperSuite_CopyBox" font="DeveloperSuiteFont" editEnabled="false" virtual="true">
+            <OnMouseUp>
+                self:TakeFocus()
+                self:SelectAll()
+            </OnMouseUp>
+            <OnFocusLost>
+                self:SetCursorPosition(0)
+            </OnFocusLost>
+        </EditBox>
+
+        <!-- Explorer list row -->
         <Control name="DeveloperSuiteExplorerRow" virtual="true">
+            <Dimensions y="28"/>
             <Anchor point="TOPLEFT"/>
             <Anchor point="TOPRIGHT"/>
-            <Dimensions y="26"/>
             <Controls>
                 <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
 
                 <Label name="$(parent)Value" font="DeveloperSuiteFont" verticalAlignment="CENTER">
-                    <Dimensions x="160" y="16" />
+                    <Dimensions x="160" y="18" />
                     <Anchor point="RIGHT" />
                 </Label>
                 <Label name="$(parent)Type" font="DeveloperSuiteFont" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
-                    <Dimensions x="110" y="16" />
+                    <Dimensions x="110" y="18" />
                     <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" />
                 </Label>
-                <EditBox name="$(parent)Name" inherits="ZO_DefaultEdit" font="DeveloperSuiteFont" editEnabled="false">
-                    <Dimensions y="16" />
+                <EditBox name="$(parent)Name" inherits="ZO_DefaultEdit DeveloperSuite_CopyBox">
+                    <Dimensions y="18" />
                     <Anchor point="LEFT" />
                     <Anchor point="RIGHT" relativeTo="$(parent)Type" relativePoint="LEFT" offsetX="-10" />
-
-                    <OnMouseUp>
-                        self:TakeFocus()
-                        self:SelectAll()
-                    </OnMouseUp>
-                    <OnFocusLost>
-                        self:SetCursorPosition(0)
-                    </OnFocusLost>
                 </EditBox>
             </Controls>
         </Control>
 
+        <!-- Library list row -->
         <Control name="DeveloperSuiteLibraryRow" mouseEnabled="true" virtual="true">
+            <Dimensions y="28"/>
             <Anchor point="TOPLEFT"/>
             <Anchor point="TOPRIGHT"/>
-            <Dimensions y="26"/>
             <OnMouseEnter>
                 DeveloperSuiteLibraryRow_OnMouseEnter(self)
             </OnMouseEnter>
@@ -71,177 +92,150 @@
                 <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
 
                 <Label name="$(parent)Name" font="DeveloperSuiteFont">
-                    <Dimensions y="16" />
+                    <Dimensions y="18" />
                     <Anchor point="LEFT" />
                     <Anchor point="RIGHT" />
                 </Label>
             </Controls>
         </Control>
 
-        <!-- / -->
-
-        <TopLevelControl name="DeveloperSuiteAbout" mouseEnabled="true" movable="true" resizeHandleSize="0">
-            <Dimensions x="320" y="140"  />
-            <DimensionConstraints maxX="320" maxY="140"  />
+        <!-- Resizable, movable, closes on right-click -->
+        <TopLevelControl name="DeveloperSuite_TopLevelControl" mouseEnabled="true" movable="true" resizeHandleSize="10" virtual="true">
             <Anchor point="CENTER" />
 
             <OnMouseDown>
                 if (button == MOUSE_BUTTON_INDEX_RIGHT) then
-                    DeveloperSuite_Hide(self)
+                    DeveloperSuite_TopLevelControl_Hide(self)
                 end
             </OnMouseDown>
+        </TopLevelControl>
+
+        <!-- / -->
+        <!-- / -->
+        <!-- / -->
+
+        <TopLevelControl name="DeveloperSuiteAbout" inherits="DeveloperSuite_TopLevelControl" resizeHandleSize="0">
+            <DimensionConstraints minX="360" minY="160" />
 
             <Controls>
-                <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="222222" />
+                <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="333333" />
 
-                <Label name="$(parent)NameLabel" text="Developer Suite" font="DeveloperSuiteFontHuge">
+                <Label name="$(parent)NameLabel" text="Developer Suite" font="DeveloperSuiteFontBig">
                     <Anchor point="TOP" offsetY="25" />
                 </Label>
 
-                <Label name="$(parent)VersionLabel" text="Version 0.1.2alpha (Dec 6 2015)" font="DeveloperSuiteFontBold">
+                <Label name="$(parent)VersionLabel" text="SI_DEVELOPER_SUITE_VERSION" font="DeveloperSuiteFontBold">
                     <Anchor point="TOP" relativeTo="$(parent)NameLabel" relativePoint="BOTTOM" offsetY="5" />
                 </Label>
 
-                <Button name="$(parent)CloseButton" inherits="DeveloperSuiteButton" text="CLOSE">
-                    <Dimensions x="55" y="20" />
-                    <Anchor point="BOTTOM" offsetY="-15" offsetX="-55" />
+                <EditBox name="$(parent)URLEditBox" inherits="ZO_DefaultEdit DeveloperSuite_CopyBox" font="DeveloperSuiteSmallFontBold" color="AAAAAA">
+                    <Dimensions y="12" x="308" />
+                    <Anchor point="TOP" relativeTo="$(parent)VersionLabel" relativePoint="BOTTOM" offsetY="5" />
 
-                    <OnClicked>
-                        DeveloperSuite_Hide(self:GetParent())
-                    </OnClicked>
-                </Button>
-
-                <Button name="$(parent)FeedbackButton" inherits="DeveloperSuiteButton" text="FEEDBACK">
-                    <Dimensions x="88" y="20" />
-                    <Anchor point="LEFT" relativeTo="$(parent)CloseButton" relativePoint="RIGHT" offsetX="25" />
-
-                    <OnClicked>
-                        MAIL_SEND:ComposeMailTo("@eolhain")
-                    </OnClicked>
-                </Button>
-            </Controls>
-        </TopLevelControl>
-
-        <!-- / -->
-
-        <TopLevelControl name="DeveloperSuiteEditor" mouseEnabled="true" movable="true" resizeHandleSize="10">
-            <DimensionConstraints minX="480" minY="320"  />
-            <Anchor point="CENTER" />
-
-            <OnMouseDown>
-                if (button == MOUSE_BUTTON_INDEX_RIGHT) then
-                    DeveloperSuite_Hide(self)
-                end
-            </OnMouseDown>
-
-            <Controls>
-                <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="004455" />
-
-                <EditBox name="$(parent)ScriptEditBox" font="DeveloperSuiteFont" inherits="ZO_DefaultEditMultiLine" maxInputCharacters="1000">
-                    <Anchor point="TOPLEFT" offsetX="20" offsetY="20" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-58" />
-
-                    <Controls>
-                        <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="111111" alpha="0.9">
-                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="-10" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="10" offsetY="10" />
-                        </Texture>
-                    </Controls>
+                    <OnInitialized>
+                        self:SetText("http://www.esoui.com/downloads/fileinfo.php?id=1249")
+                    </OnInitialized>
                 </EditBox>
 
-                <Button name="$(parent)RunButton" inherits="DeveloperSuiteButton" text="RUN">
-                    <Dimensions x="100" y="20" />
-                    <Anchor point="BOTTOM" offsetY="-15" />
+                <Button name="$(parent)CloseButton" inherits="DeveloperSuite_TextButton" text="CLOSE">
+                    <Dimensions x="55" y="20" />
+                    <Anchor point="BOTTOM" offsetY="-25" />
+
+                    <OnClicked>
+                        DeveloperSuite_TopLevelControl_Hide(self:GetParent())
+                    </OnClicked>
                 </Button>
             </Controls>
         </TopLevelControl>
 
         <!-- / -->
+        <!-- / -->
+        <!-- / -->
 
-        <TopLevelControl name="DeveloperSuiteExplorer" mouseEnabled="true" movable="true" resizeHandleSize="10">
-            <DimensionConstraints minX="640" minY="320" />
-            <Anchor point="CENTER" />
-
-            <OnMouseDown>
-                if (button == MOUSE_BUTTON_INDEX_RIGHT) then
-                    DeveloperSuite_Hide(self)
-                end
-            </OnMouseDown>
+        <TopLevelControl name="DeveloperSuiteConsole" inherits="DeveloperSuite_TopLevelControl" hidden="true">
+            <DimensionConstraints minX="520" minY="320"  />
 
             <Controls>
-                <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="773300" />
+                <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="004466" />
 
-                <EditBox name="$(parent)SearchBox" inherits="ZO_DefaultEdit" font="DeveloperSuiteFont" textType="ALPHANUMERIC">
-                    <Dimensions y="16" />
+                <EditBox name="$(parent)Output" inherits="ZO_DefaultEditMultiLine DeveloperSuite_EditBox DeveloperSuite_CopyBox" maxInputCharacters="4096">
+                    <Dimensions />
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-68" />
+                </EditBox>
+
+                <EditBox name="$(parent)Input" inherits="ZO_DefaultEdit DeveloperSuite_EditBox" maxInputCharacters="1024">
+                    <Anchor point="BOTTOMLEFT" offsetX="20" offsetY="-20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-20" />
+                </EditBox>
+            </Controls>
+        </TopLevelControl>
+
+        <!-- / -->
+        <!-- / -->
+        <!-- / -->
+
+        <TopLevelControl name="DeveloperSuiteExplorer" inherits="DeveloperSuite_TopLevelControl" hidden="true">
+            <DimensionConstraints minX="640" minY="320" />
+
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="883300" />
+
+                <EditBox name="$(parent)SearchEditBox" inherits="ZO_DefaultEdit DeveloperSuite_EditBox">
                     <Anchor point="TOPLEFT" offsetX="20" offsetY="20" />
                     <Anchor point="TOPRIGHT" offsetX="-20" offsetY="20" />
-
-                    <Controls>
-                        <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="111111" alpha="0.9">
-                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="-10" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="10" offsetY="10" />
-                        </Texture>
-                    </Controls>
                 </EditBox>
 
-                <Control name="$(parent)SearchTypes">
-                    <Dimensions y="16" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchBox" relativePoint="BOTTOMLEFT" offsetY="25" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchBox" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                <Control name="$(parent)SearchOption">
+                    <Dimensions y="18" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchEditBox" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchEditBox" relativePoint="BOTTOMRIGHT" offsetY="25" />
 
                     <Controls>
-                        <Button name="$(parent)Function" inherits="DeveloperSuiteStateButton" text="FUNCTION">
+                        <Button name="$(parent)FunctionButton" inherits="DeveloperSuite_StateButton" text="FUNCTION">
                             <Dimensions x="66" y="26" />
                             <Anchor point="LEFT" />
                         </Button>
 
-                        <Button name="$(parent)Table" inherits="DeveloperSuiteStateButton" text="TABLE/USERDATA">
+                        <Button name="$(parent)TableButton" inherits="DeveloperSuite_StateButton" text="TABLE/USERDATA">
                             <Dimensions x="116" y="26" />
-                            <Anchor point="LEFT" relativeTo="$(parent)Function" relativePoint="RIGHT" offsetX="25" />
+                            <Anchor point="LEFT" relativeTo="$(parent)FunctionButton" relativePoint="RIGHT" offsetX="25" />
                         </Button>
 
-                        <Button name="$(parent)Number" inherits="DeveloperSuiteStateButton" text="NUMBER">
+                        <Button name="$(parent)NumberButton" inherits="DeveloperSuite_StateButton" text="NUMBER">
                             <Dimensions x="50" y="26" />
-                            <Anchor point="LEFT" relativeTo="$(parent)Table" relativePoint="RIGHT" offsetX="25" />
+                            <Anchor point="LEFT" relativeTo="$(parent)TableButton" relativePoint="RIGHT" offsetX="25" />
                         </Button>
 
-                        <Button name="$(parent)String" inherits="DeveloperSuiteStateButton" text="STRING">
+                        <Button name="$(parent)StringButton" inherits="DeveloperSuite_StateButton" text="STRING">
                             <Dimensions x="50" y="26" />
-                            <Anchor point="LEFT" relativeTo="$(parent)Number" relativePoint="RIGHT" offsetX="25" />
+                            <Anchor point="LEFT" relativeTo="$(parent)NumberButton" relativePoint="RIGHT" offsetX="25" />
                         </Button>
 
-                        <Button name="$(parent)Other" inherits="DeveloperSuiteStateButton" text="OTHER">
+                        <Button name="$(parent)OtherButton" inherits="DeveloperSuite_StateButton" text="OTHER">
                             <Dimensions x="42" y="26" />
-                            <Anchor point="LEFT" relativeTo="$(parent)String" relativePoint="RIGHT" offsetX="25" />
+                            <Anchor point="LEFT" relativeTo="$(parent)StringButton" relativePoint="RIGHT" offsetX="25" />
                         </Button>
                     </Controls>
                 </Control>
 
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchTypes" relativePoint="BOTTOMLEFT" offsetY="20" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-15" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchOption" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-20" />
 
                     <Controls>
-                        <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="111111" alpha="0.9">
-                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="-5" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="5" />
-                        </Texture>
+                        <Texture name="$(parent)BG" inherits="DeveloperSuite_Background" />
                     </Controls>
                 </Control>
             </Controls>
         </TopLevelControl>
 
         <!-- / -->
+        <!-- / -->
+        <!-- / -->
 
-        <TopLevelControl name="DeveloperSuiteLibrary" mouseEnabled="true" movable="true" resizeHandleSize="10">
-            <DimensionConstraints minX="320" maxX="640" minY="640" />
-            <Anchor point="RIGHT" relativePoint="CENTER" />
-
-            <OnMouseDown>
-                if (button == MOUSE_BUTTON_INDEX_RIGHT) then
-                    DeveloperSuite_Hide(self)
-                end
-            </OnMouseDown>
+        <TopLevelControl name="DeveloperSuiteLibrary" inherits="DeveloperSuite_TopLevelControl" hidden="true">
+            <DimensionConstraints minX="400" maxX="640" minY="640" />
 
             <Controls>
                 <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="225500" />
@@ -258,19 +252,14 @@
                             <Anchor point="CENTER" />
                         </Texture>
 
-                        <EditBox name="$(parent)Path" inherits="ZO_DefaultEdit" font="DeveloperSuiteFont" horizontalAlignment="CENTER" editEnabled="false">
+                        <EditBox name="$(parent)Path" inherits="ZO_DefaultEdit DeveloperSuite_CopyBox">
                             <Dimensions x="590" y="16" />
                             <Anchor point="BOTTOM" offsetY="-25" />
-                            <OnMouseUp>
-                                self:TakeFocus()
-                                self:SelectAll()
-                            </OnMouseUp>
                         </EditBox>
                     </Controls>
                 </Control>
 
-                <EditBox name="$(parent)SearchBox" inherits="ZO_DefaultEdit" font="DeveloperSuiteFont" textType="ALPHANUMERIC">
-                    <Dimensions y="16" />
+                <EditBox name="$(parent)SearchEditBox" inherits="ZO_DefaultEdit DeveloperSuite_EditBox" textType="ALPHANUMERIC">
                     <Anchor point="TOPLEFT" offsetX="20" offsetY="20" />
                     <Anchor point="TOPRIGHT" offsetX="-20" offsetY="20" />
 
@@ -281,27 +270,20 @@
                     <OnDownArrow>
                         DeveloperSuiteLibrarySearchBox_OnDownArrow()
                     </OnDownArrow>
-
-                    <Controls>
-                        <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="111111" alpha="0.9">
-                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="-10" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="10" offsetY="10" />
-                        </Texture>
-                    </Controls>
                 </EditBox>
 
-                <Control name="$(parent)SearchType">
-                    <Dimensions y="16" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchBox" relativePoint="BOTTOMLEFT" offsetY="25" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchBox" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                <Control name="$(parent)SearchOption">
+                    <Dimensions y="18" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchEditBox" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchEditBox" relativePoint="BOTTOMRIGHT" offsetY="25" />
 
                     <Controls>
-                        <Button name="$(parent)TextureButton" inherits="DeveloperSuiteStateButton" text="TEXTURES">
+                        <Button name="$(parent)TextureButton" inherits="DeveloperSuite_StateButton" text="TEXTURES">
                             <Dimensions x="66" y="26" />
                             <Anchor point="LEFT" />
                         </Button>
 
-                        <Button name="$(parent)SoundButton" inherits="DeveloperSuiteStateButton" text="SOUND">
+                        <Button name="$(parent)SoundButton" inherits="DeveloperSuite_StateButton" text="SOUND">
                             <Dimensions x="42" y="26" />
                             <Anchor point="LEFT" relativeTo="$(parent)TextureButton" relativePoint="RIGHT" offsetX="25" />
                         </Button>
@@ -309,14 +291,11 @@
                 </Control>
 
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchType" relativePoint="BOTTOMLEFT" offsetY="20" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-15" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchOption" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-20" />
 
                     <Controls>
-                        <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="111111" alpha="0.9">
-                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="-5" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="5" />
-                        </Texture>
+                        <Texture name="$(parent)BG" inherits="DeveloperSuite_Background" />
                     </Controls>
                 </Control>
             </Controls>

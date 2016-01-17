@@ -1,8 +1,8 @@
 <Bindings>
     <Layer name="General">
         <Category name="Developer Suite">
-            <Action name="DEVELOPER_SUITE_ZGOO_MOC">
-                <Down>DeveloperSuite_Binding_ZgooMoc()</Down>
+            <Action name="DEVELOPER_SUITE_INSPECT_CONTROL">
+                <Down>DeveloperSuite_Binding_InspectControl()</Down>
             </Action>
             <Action name="DEVELOPER_SUITE_RELOADUI">
                 <Down>DeveloperSuite_Binding_Reload()</Down>
@@ -13,11 +13,8 @@
             <Action name="DEVELOPER_SUITE_EXPLORER">
                 <Down>DeveloperSuite_Binding_Explorer()</Down>
             </Action>
-            <Action name="DEVELOPER_SUITE_EDITOR">
-                <Down>DeveloperSuite_Binding_Editor()</Down>
-            </Action>
-            <Action name="DEVELOPER_SUITE_RUN">
-                <Down>DeveloperSuite_Binding_Run()</Down>
+            <Action name="DEVELOPER_SUITE_CONSOLE">
+                <Down>DeveloperSuite_Binding_Console()</Down>
             </Action>
         </Category>
     </Layer>
