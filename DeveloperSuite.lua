@@ -174,6 +174,31 @@ function Console:New(...)
     return console
 end
 
+function Console:RefreshHistoryIndex()
+    self.historyIndex = #self.sv.history + 1
+end
+
+function Console:AddToHistory(text)
+    table.insert(self.sv.history, text)
+    self:RefreshHistoryIndex()
+end
+
+function Console:NavigateHistoryUp()
+    local inputEditBox = GetControl(self.control, "Input")
+    if (self.historyIndex > 1) then
+        self.historyIndex = self.historyIndex - 1
+        inputEditBox:SetText(self.sv.history[self.historyIndex])
+    end
+end
+
+function Console:NavigateHistoryDown()
+    local inputEditBox = GetControl(self.control, "Input")
+    if (self.historyIndex <= #self.sv.history) then
+        self.historyIndex = self.historyIndex + 1
+        inputEditBox:SetText(self.sv.history[self.historyIndex])
+    end
+end
+
 function Console:Initialize(control, sv)
     DeveloperSuite_TopLevelControl_Initialize(self, control, sv)
 
@@ -187,21 +212,23 @@ function Console:Initialize(control, sv)
         self.sv.output = outputEditBox:GetText()
     end)
 
-    local historyIndex = #self.sv.history + 1
+    self:RefreshHistoryIndex()
 
     local inputEditBox = GetControl(self.control, "Input")
     inputEditBox:SetHandler("OnEnter", function()
-        local source = inputEditBox:GetText()
+        local inputText = inputEditBox:GetText()
 
-        table.insert(self.sv.history, source)
-        historyIndex = #self.sv.history + 1
+        self:AddToHistory(inputText)
+        self:AddOutput("> "..inputText)
 
-        if source == "clear" then
-            outputEditBox:SetText("")
-        elseif source == "exit" then
+        if (inputText == "clear") then
+            self:ClearOutput()
+        elseif (inputText == "exit") then
             self:Toggle()
+        elseif (inputText:byte(1) == 47) then
+            DoCommand(inputText)
         else
-            source = string.format("DEVELOPER_SUITE_CONSOLE:Output(function() return %s end)", source)
+            local source = string.format("DEVELOPER_SUITE_CONSOLE:AddOutput(function() return %s end)", inputText)
             local script = zo_loadstring(source)
 
             if script then
@@ -213,28 +240,27 @@ function Console:Initialize(control, sv)
     end)
 
     inputEditBox:SetHandler("OnUpArrow", function()
-        if (historyIndex > 1) then
-            historyIndex = historyIndex - 1
-            inputEditBox:SetText(self.sv.history[historyIndex])
-        end
+        self:NavigateHistoryUp()
     end)
 
     inputEditBox:SetHandler("OnDownArrow", function()
-        if (historyIndex <= #self.sv.history) then
-            historyIndex = historyIndex + 1
-            inputEditBox:SetText(self.sv.history[historyIndex])
-        end
+        self:NavigateHistoryDown()
     end)
 end
 
-function Console:Output(mixed)
+function Console:ClearOutput()
     local outputEditBox = GetControl(self.control, "Output")
-    local history = outputEditBox:GetText()
+    outputEditBox:SetText("")
+end
 
-    if type(mixed) == "function" then
-        outputEditBox:SetText(history..DeveloperSuite_Console_Dump(mixed()))
+function Console:AddOutput(mixed)
+    local outputEditBox = GetControl(self.control, "Output")
+    local outputHistory = outputEditBox:GetText()
+
+    if (type(mixed) == "function") then
+        outputEditBox:SetText(outputHistory..DeveloperSuite_Console_Dump(mixed()))
     else
-        outputEditBox:SetText(history..DeveloperSuite_Console_Dump(mixed))
+        outputEditBox:SetText(outputHistory..mixed.."\n")
     end
 end
 
