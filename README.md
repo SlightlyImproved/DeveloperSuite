@@ -1,5 +1,5 @@
 # Developer Suite
 
-> Collection of in-game tools for add-ons developers.
+> ESO in-game tools for add-on developers.
 
 ...
