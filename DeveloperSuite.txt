@@ -1,10 +1,22 @@
-## APIVersion: 100013
-## Title: Developer Suite
-## Version: 0.2.0beta (Jan 17 2016)
-## License: CC BY-NC-SA 4.0
-## SavedVariables: DeveloperSuiteSavedVars
+## APIVersion: 100019
+## Title: DeveloperSuite
+## Version: 0.3.0
+## License: MIT
+## SavedVariables: DeveloperSuite_SavedVars
 
 Textures.lua
-DeveloperSuite.lua
-DeveloperSuite.xml
+
+DeveloperSuiteShared.xml
+DeveloperSuiteShared.lua
+DeveloperSuiteAbout.xml
+DeveloperSuiteAbout.lua
+DeveloperSuiteConsole.xml
+DeveloperSuiteConsole.lua
+DeveloperSuiteLibrary.xml
+DeveloperSuiteLibrary.lua
+DeveloperSuiteExplorer.xml
+DeveloperSuiteExplorer.lua
+DeveloperSuiteInspector.xml
+DeveloperSuiteInspector.lua
+
 Bindings.xml

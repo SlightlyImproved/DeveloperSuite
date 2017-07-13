@@ -1,0 +1,84 @@
+<GuiXml>
+    <String name="DEVELOPER_SUITE_FONT" value="DeveloperSuite/RobotoMono-Regular.ttf"/>
+    <String name="DEVELOPER_SUITE_FONT_BOLD" value="DeveloperSuite/RobotoMono-Bold.ttf"/>
+
+    <Font name="DeveloperSuite_FontHuge" font="$(DEVELOPER_SUITE_FONT_BOLD)|24|shadow"/><!-- ? per letter -->
+    <Font name="DeveloperSuite_FontBig" font="$(DEVELOPER_SUITE_FONT_BOLD)|18|shadow"/><!-- 11 per letter -->
+    <Font name="DeveloperSuite_Font" font="$(DEVELOPER_SUITE_FONT)|14|shadow"/><!-- 8.25 per letter -->
+    <Font name="DeveloperSuite_FontBold" font="$(DEVELOPER_SUITE_FONT_BOLD)|14|shadow"/>
+    <Font name="DeveloperSuite_FontSmall" font="$(DEVELOPER_SUITE_FONT)|12|shadow"/>
+    <Font name="DeveloperSuite_FontSmallBold" font="$(DEVELOPER_SUITE_FONT_BOLD)|12|shadow"/>
+
+    <Controls>
+        <Button name="DeveloperSuite_CheckButton" inherits="ZO_CheckButton" virtual="true">
+            <OnInitialized>
+                ZO_CheckButton_SetLabelText(self, "")
+                self.label:SetFont("DeveloperSuite_FontBold")
+            </OnInitialized>
+        </Button>
+
+        <!-- Text-only button with normal/hover/pressed blending colors. -->
+        <Button name="DeveloperSuite_TextButton" inherits="ZO_DefaultTextButton" font="DeveloperSuite_FontBig" blendMode="ADD" virtual="true">
+            <FontColors normalColor="99FFFFFF" pressedColor="FFFFFFFF" mouseOverColor="EEFFFFFF" disabledColor="66FFFFFF"/>
+        </Button>
+
+        <Control name="DeveloperSuite_ComboBox" inherits="ZO_ComboBox" virtual="true">
+            <OnInitialized>
+                local comboBox = ZO_ComboBox:New(self)
+                comboBox:SetFont("DeveloperSuite_FontBold")
+            </OnInitialized>
+        </Control>
+
+        <!-- Single-line edit box backdrop. -->
+        <Backdrop name="DeveloperSuite_EditBoxBackdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard" blendMode="ALPHA" alpha="1" virtual="true">
+            <Dimensions y="24"/>
+        </Backdrop>
+
+        <!-- Single-line edit box. -->
+        <EditBox name="DeveloperSuite_EditBox" inherits="ZO_DefaultEdit" font="DeveloperSuite_FontBold" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
+            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+        </EditBox>
+
+        <!-- Non-edittable, auto-select on focus (for copy) -->
+        <EditBox name="DeveloperSuite_CopyBox" inherits="DeveloperSuite_EditBox" editEnabled="false" virtual="true">
+            <OnMouseUp>
+                self:TakeFocus()
+                self:SelectAll()
+            </OnMouseUp>
+            <OnFocusLost>
+                self:SetCursorPosition(0)
+            </OnFocusLost>
+        </EditBox>
+
+        <!-- Top level control backdrop (without padding). -->
+        <Backdrop name="DeveloperSuite_Backdrop" inherits="ZO_DefaultBackdrop" virtual="true">
+            <!-- <AnchorFill/> -->
+            <Anchor point="TOPLEFT" offsetX="2" offsetY="1" />
+            <Anchor point="BOTTOMRIGHT" offsetY="1" />
+        </Backdrop>
+
+        <!-- Resizable, movable, closes on right-click, has default backdrop. -->
+        <TopLevelControl name="DeveloperSuite_TopLevelControl" mouseEnabled="true" movable="true" resizeHandleSize="4" virtual="true">
+            <Anchor point="CENTER"/>
+            <OnMouseDown>
+                if (button == MOUSE_BUTTON_INDEX_RIGHT) then
+                    DeveloperSuite_TopLevelControl_Hide(self)
+                end
+            </OnMouseDown>
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="DeveloperSuite_Backdrop"/>
+            </Controls>
+        </TopLevelControl>
+
+        <!-- / -->
+        <TopLevelControl name="DeveloperSuite_Outline" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)Outline" edgeColor="FF0000" centerColor="00000000" tier="HIGH" layer="OVERLAY" blendMode="ADD">
+                    <AnchorFill/>
+                    <Edge edgeSize="2"/>
+                </Backdrop>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

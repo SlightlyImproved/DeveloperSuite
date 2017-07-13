@@ -1,0 +1,81 @@
+<!-- Developer Suite
+  -- The MIT License © Arthur Corenzan
+  -->
+<GuiXml>
+    <Controls>
+        <Control name="DeveloperSuite_LibraryRow" mouseEnabled="true" virtual="true">
+            <Dimensions y="28"/>
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="TOPRIGHT"/>
+            <OnMouseEnter>
+                DeveloperSuite_LibraryRow_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                DeveloperSuite_LibraryRow_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                DeveloperSuite_LibraryRow_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
+                <Label name="$(parent)Name" font="DeveloperSuite_FontBold" wrapMode="ELLIPSIS">
+                    <Dimensions y="20"/>
+                    <Anchor point="LEFT" offsetX="4"/>
+                    <Anchor point="RIGHT" offsetX="-4"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="DeveloperSuite_LibraryTopLevelControl" inherits="DeveloperSuite_TopLevelControl" hidden="true">
+            <DimensionConstraints minX="340" minY="500"/>
+
+            <Controls>
+                <Backdrop name="$(parent)SearchQuery" inherits="DeveloperSuite_EditBoxBackdrop">
+                    <Anchor point="TOPLEFT" offsetX="12" offsetY="12"/>
+                    <Anchor point="TOPRIGHT" offsetX="-12" offsetY="12"/>
+                    <Controls>
+                        <EditBox name="$(parent)EditBox" inherits="DeveloperSuite_EditBox">
+                            <OnDownArrow>
+                                DeveloperSuite_LibrarySearchQueryEditBox_OnDownArrow(self)
+                            </OnDownArrow>
+                            <OnUpArrow>
+                                DeveloperSuite_LibrarySearchQueryEditBox_OnUpArrow(self)
+                            </OnUpArrow>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)SearchTypeComboBox" inherits="DeveloperSuite_ComboBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchQuery" relativePoint="BOTTOMLEFT" offsetY="8"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchQuery" relativePoint="BOTTOMRIGHT" offsetY="8"/>
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchTypeComboBox" relativePoint="BOTTOMLEFT" offsetY="6"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="-12"/>
+                    <Controls>
+                        <Backdrop name="$(parent)BG" inherits="DeveloperSuite_EditBoxBackdrop">
+                            <AnchorFill/>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Preview" mouseEnabled="true">
+                    <Dimensions x="500" y="500"/>
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-2" offsetY="1"/>
+                    <Controls>
+                        <Texture name="$(parent)BG" inherits="ZO_TintableBackground" color="000000" alpha="0.9"/>
+                        <Texture name="$(parent)Texture" resizeToFitFile="true">
+                            <DimensionConstraints maxX="476" maxY="440"/>
+                            <Anchor point="CENTER" offsetY="-18"/>
+                        </Texture>
+                        <EditBox name="$(parent)EditBox" inherits="DeveloperSuite_CopyBox">
+                            <Dimensions x="476" y="20"/>
+                            <Anchor point="BOTTOM" offsetY="-12"/>
+                        </EditBox>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

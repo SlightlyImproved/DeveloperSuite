@@ -1,0 +1,9 @@
+<!-- Developer Suite
+  -- The MIT License © Arthur Corenzan
+  -->
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="DeveloperSuite_InspectorTopLevelControl" inherits="DeveloperSuite_TopLevelControl" hidden="true">
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

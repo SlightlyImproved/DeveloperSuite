@@ -1,0 +1,39 @@
+<!-- Developer Suite
+  -- The MIT License © Arthur Corenzan
+  -->
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="DeveloperSuite_ConsoleTopLevelControl" inherits="DeveloperSuite_TopLevelControl" hidden="true">
+            <DimensionConstraints minX="520" minY="320"/>
+
+            <Controls>
+                <Backdrop name="$(parent)Input" inherits="DeveloperSuite_EditBoxBackdrop">
+                    <Anchor point="BOTTOMLEFT" offsetX="12" offsetY="-12"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="-12"/>
+                    <Controls>
+                        <EditBox name="$(parent)EditBox" inherits="DeveloperSuite_EditBox"/>
+                    </Controls>
+                </Backdrop>
+
+                <Backdrop name="$(parent)Output" inherits="DeveloperSuite_EditBoxBackdrop">
+                    <Anchor point="TOPLEFT" offsetX="12" offsetY="12"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Input" relativePoint="TOPRIGHT" offsetX="0" offsetY="-8"/>
+                    <Controls>
+                        <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer">
+                            <AnchorFill/>
+                        </Control>
+
+                        <Label name="$(parent)Label" font="DeveloperSuite_FontBold">
+                            <Anchor point="TOPLEFT"/>
+                            <OnInitialized>
+                                local scrollChild = self:GetParent():GetNamedChild("ScrollContainerScrollChild")
+                                self:SetParent(scrollChild)
+                                self:SetAnchor(TOPLEFT, scrollChild, TOPLEFT, 4, 4)
+                            </OnInitialized>
+                        </Label>
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

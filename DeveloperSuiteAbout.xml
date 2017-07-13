@@ -1,0 +1,27 @@
+<!-- Developer Suite
+  -- The MIT License © Arthur Corenzan
+  -->
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="DeveloperSuite_AboutTopLevelControl" inherits="DeveloperSuite_TopLevelControl" resizeHandleSize="0">
+            <DimensionConstraints minX="360" minY="160"/>
+            <Controls>
+                <Label name="$(parent)NameLabel" text="Developer Suite" font="DeveloperSuite_FontHuge">
+                    <Anchor point="TOP" offsetY="25"/>
+                </Label>
+
+                <Label name="$(parent)VersionLabel" text="SI_DEVELOPER_SUITE_VERSION" font="DeveloperSuite_FontSmallBold">
+                    <Anchor point="TOP" relativeTo="$(parent)NameLabel" relativePoint="BOTTOM" offsetY="5"/>
+                </Label>
+
+                <Button name="$(parent)CloseButton" inherits="DeveloperSuite_TextButton" text="CLOSE">
+                    <Dimensions x="55" y="20"/>
+                    <Anchor point="BOTTOM" offsetY="-25"/>
+                    <OnClicked>
+                        DeveloperSuite_TopLevelControl_Hide(self:GetParent())
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

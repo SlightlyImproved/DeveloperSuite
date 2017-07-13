@@ -1,0 +1,52 @@
+<!-- Developer Suite
+  -- The MIT License © Arthur Corenzan
+  -->
+<GuiXml>
+    <Controls>
+        <Control name="DeveloperSuite_ExplorerRow" virtual="true">
+            <Dimensions y="28"/>
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" color="FFFF0000"/>
+                <Label name="$(parent)Value" font="DeveloperSuite_FontBold" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                    <Dimensions x="220" y="28"/>
+                    <Anchor point="RIGHT" offsetX="-4"/>
+                </Label>
+                <EditBox name="$(parent)Name" inherits="DeveloperSuite_CopyBox" verticalAlignment="CENTER">
+                    <Dimensions y="20"/>
+                    <Anchor point="LEFT" offsetX="4"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-24"/>
+                </EditBox>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="DeveloperSuite_ExplorerTopLevelControl" inherits="DeveloperSuite_TopLevelControl" hidden="true">
+            <DimensionConstraints minX="640" minY="320"/>
+
+            <Controls>
+                <Backdrop name="$(parent)SearchQuery" inherits="DeveloperSuite_EditBoxBackdrop">
+                    <Anchor point="TOPLEFT" offsetX="12" offsetY="12"/>
+                    <Anchor point="TOPRIGHT" offsetX="-12" offsetY="12"/>
+                    <Controls>
+                        <EditBox name="$(parent)EditBox" inherits="DeveloperSuite_EditBox"/>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)SearchTypes" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchQuery" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchQuery" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchTypes" relativePoint="BOTTOMLEFT" offsetX="2" offsetY="10"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="-12"/>
+
+                    <Controls>
+                        <Backdrop name="$(parent)BG" inherits="DeveloperSuite_EditBoxBackdrop">
+                            <AnchorFill/>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

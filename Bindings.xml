@@ -1,11 +1,11 @@
 <Bindings>
-    <Layer name="General">
+    <Layer name="SI_KEYBINDINGS_CATEGORY_GENERAL">
         <Category name="Developer Suite">
-            <Action name="DEVELOPER_SUITE_INSPECT_CONTROL">
-                <Down>DeveloperSuite_Binding_InspectControl()</Down>
-            </Action>
             <Action name="DEVELOPER_SUITE_RELOADUI">
                 <Down>DeveloperSuite_Binding_Reload()</Down>
+            </Action>
+            <Action name="DEVELOPER_SUITE_INSPECTOR">
+                <Down>DeveloperSuite_Binding_Inspector()</Down>
             </Action>
             <Action name="DEVELOPER_SUITE_LIBRARY">
                 <Down>DeveloperSuite_Binding_Library()</Down>
