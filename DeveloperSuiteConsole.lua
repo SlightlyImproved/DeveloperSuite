@@ -129,6 +129,14 @@ function DeveloperSuite_Console:AddOutput(output)
     self.outputLabel:SetText(self.savedVars.output)
 end
 
+function DeveloperSuite_Console:Show()
+    DeveloperSuite_TopLevelControl_Show(self.control)
+end
+
+function DeveloperSuite_Console:Hide()
+    DeveloperSuite_TopLevelControl_Show(self.control)
+end
+
 function DeveloperSuite_Console:Toggle()
     DeveloperSuite_TopLevelControl_Toggle(self.control, self.inputEditBox)
 end
