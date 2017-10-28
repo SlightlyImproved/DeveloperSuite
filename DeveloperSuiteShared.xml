@@ -1,6 +1,6 @@
 <GuiXml>
-    <String name="DEVELOPER_SUITE_FONT" value="DeveloperSuite/RobotoMono-Regular.ttf"/>
-    <String name="DEVELOPER_SUITE_FONT_BOLD" value="DeveloperSuite/RobotoMono-Bold.ttf"/>
+    <String name="DEVELOPER_SUITE_FONT" value="DeveloperSuite/RobotoMono/RobotoMono-Regular.ttf"/>
+    <String name="DEVELOPER_SUITE_FONT_BOLD" value="DeveloperSuite/RobotoMono/RobotoMono-Bold.ttf"/>
 
     <Font name="DeveloperSuite_FontHuge" font="$(DEVELOPER_SUITE_FONT_BOLD)|24|shadow"/><!-- ? per letter -->
     <Font name="DeveloperSuite_FontBig" font="$(DEVELOPER_SUITE_FONT_BOLD)|18|shadow"/><!-- 11 per letter -->
