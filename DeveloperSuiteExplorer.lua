@@ -160,7 +160,8 @@ function DeveloperSuite_Explorer:SetupRow(control, data)
     valueLabel:SetText(data.value)
     valueLabel:SetMouseEnabled(true)
     local function onMouseDown()
-        SLASH_COMMANDS["/tbug"](data.name)
+        DEVELOPER_SUITE_CONSOLE:Show()
+        DEVELOPER_SUITE_CONSOLE:Run(data.name)
     end
     valueLabel:SetHandler("OnMouseDown", onMouseDown)
     
