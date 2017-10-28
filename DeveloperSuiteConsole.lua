@@ -61,24 +61,8 @@ function DeveloperSuite_Console:Initialize(control, savedVars)
     self:AddOutput()
 
     local function onEnter()
-        local text = self.inputEditBox:GetText()
-
-        if text ~= "" then
-            self.inputEditBox:SetText("")
-
-            if text == "/clear" then
-                self:ClearOutput()
-            elseif (text:byte(1) == 47) then -- Byte (47) is a division slash.
-                DoCommand(text)
-            else
-                local script = zo_loadstring(string.format("return %s", text))
-                local value = script()
-                if script then
-                    self:AddOutput("> "..Dump(value))
-                    self:AddToHistory(text)
-                end
-            end
-        end
+        self:Run(self.inputEditBox:GetText())
+        self.inputEditBox:SetText("")
     end
     self.inputEditBox:SetHandler("OnEnter", onEnter)
 
@@ -93,6 +77,23 @@ function DeveloperSuite_Console:Initialize(control, savedVars)
     self.inputEditBox:SetHandler("OnDownArrow", onDownArrow)
 
     self:RefreshHistoryIndex()
+end
+
+function DeveloperSuite_Console:Run(text)
+    if text == "" then
+        return nil
+    elseif text == "/clear" then
+        self:ClearOutput()
+    elseif (text:byte(1) == 47) then -- Byte (47) is a division slash.
+        DoCommand(text)
+    else
+        local script = zo_loadstring(string.format("return %s", text))
+        local value = script()
+        if script then
+            self:AddOutput("> "..Dump(value))
+            self:AddToHistory(text)
+        end
+    end
 end
 
 function DeveloperSuite_Console:RefreshHistoryIndex()
