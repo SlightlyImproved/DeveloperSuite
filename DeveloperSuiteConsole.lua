@@ -7,28 +7,36 @@ local NAMESPACE = "DeveloperSuite"
 --
 --
 
-local function Dump(value, indent, history)
+local function dump(target, indent, tableHistory)
+    output = ""
     indent = indent or ""
-    history = history or {}
+    tableHistory = tableHistory or {}
+    
+    local targetType = type(target)
+    local targetToString = tostring(target)
+    
+    if (targetType == "table") then
+        for key, value in pairs(target) do
+            output = output..indent..tostring(key).." = "
 
-    local dump = ""
-    local valueType = type(value)
+            if (type(value) == "table") then
+                output = output.."(table)".."\n"
 
-    if (valueType == "table") then
-        if not history[value] then
-            dump = dump.."(table)\n"
-            history[value] = true
-            for k, v in pairs(value) do
-                dump = dump..string.format("%s[%s] = %s", indent, tostring(k), Dump(v, indent.." ", history))
+                if tableHistory[value] then
+                    output = output.." Avoiding cycle on table..."
+                else
+                    tableHistory[value] = true
+                    output = output..dump(value, indent.."  ", tableHistory)
+                end
+            else
+                output = output..dump(value)
             end
-        else
-            dump = dump.."(redundant)\n"
-        end
+        end    
     else
-        dump = dump.."("..valueType..") "..tostring(value).."\n"
+        output = "("..targetType..") "..targetToString.."\n"
     end
 
-    return dump
+    return output
 end
 
 --
@@ -90,7 +98,7 @@ function DeveloperSuite_Console:Run(text)
         local script = zo_loadstring(string.format("return %s", text))
         local value = script()
         if script then
-            self:AddOutput("> "..Dump(value))
+            self:AddOutput(dump(value))
             self:AddToHistory(text)
         end
     end
