@@ -52,7 +52,6 @@ end
 
 function DeveloperSuite_TopLevelControl_Show(control)
     control:SetHidden(false)
-    control:BringWindowToTop()
     SCENE_MANAGER:SetInUIMode(true)
 end
 
